@@ -1,4 +1,3 @@
-const { initializeDatabase } = require('../src/models/database');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,7 +9,8 @@ if (!fs.existsSync(dataDir)) {
 }
 
 try {
-  initializeDatabase();
+  // Just requiring the database module will initialize the schema
+  require('../src/models/database');
   console.log('✅ Database initialized successfully');
   process.exit(0);
 } catch (error) {

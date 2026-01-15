@@ -12,9 +12,8 @@ RUN mkdir -p data
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Install dependencies and start application at runtime
-# This avoids build-time network issues
-CMD sh -c "npm install --production && node scripts/init-db.js && node scripts/seed-data.js && npm start"
+CMD sh -c "npm install --omit=dev && node scripts/init-db.js && node scripts/seed-data.js && node server.js"
