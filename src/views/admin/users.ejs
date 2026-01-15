@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Saviynt Demo App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+  
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">User Management</h1>
+      <div class="flex gap-2">
+        <a href="/admin/users/create" class="btn btn-primary">+ Create User</a>
+        <a href="/admin" class="btn btn-secondary">Back</a>
+      </div>
+    </div>
+
+    <% if (success) { %>
+      <div class="alert alert-success"><%= success %></div>
+    <% } %>
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Roles</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(user => { %>
+            <tr>
+              <td><strong><%= user.username %></strong></td>
+              <td><%= user.first_name %> <%= user.last_name %></td>
+              <td><%= user.email %></td>
+              <td><%= user.department || 'N/A' %></td>
+              <td>
+                <% if (user.roles) { %>
+                  <% user.roles.split(',').forEach(role => { %>
+                    <span class="badge badge-primary"><%= role %></span>
+                  <% }) %>
+                <% } else { %>
+                  <span class="badge badge-gray">No roles</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (user.status === 'active') { %>
+                  <span class="badge badge-success">Active</span>
+                <% } else { %>
+                  <span class="badge badge-gray">Inactive</span>
+                <% } %>
+              </td>
+              <td>
+                <a href="/admin/users/<%= user.id %>/edit" class="btn btn-sm btn-primary">Edit</a>
+                <a href="/admin/users/<%= user.id %>/reset-password" class="btn btn-sm btn-secondary">Reset Password</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

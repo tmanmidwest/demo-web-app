@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Saviynt Demo App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+  
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Create Task</h1>
+      <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+    </div>
+
+    <div class="card">
+      <form method="POST" action="/tasks/create">
+        <div class="form-group">
+          <label for="title" class="form-label">Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="description" class="form-label">Description</label>
+          <textarea 
+            id="description" 
+            name="description" 
+            class="form-textarea"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="type" class="form-label">Type *</label>
+          <select id="type" name="type" class="form-select" required>
+            <option value="">Select type...</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Prospecting">Prospecting</option>
+            <option value="Demo">Demo</option>
+            <option value="Negotiation">Negotiation</option>
+            <option value="Renewal">Renewal</option>
+            <option value="Meeting Prep">Meeting Prep</option>
+            <option value="Training">Training</option>
+            <option value="Administrative">Administrative</option>
+            <option value="Reporting">Reporting</option>
+            <option value="Analysis">Analysis</option>
+            <option value="Research">Research</option>
+            <option value="Review">Review</option>
+            <option value="Content Creation">Content Creation</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="priority" class="form-label">Priority</label>
+          <select id="priority" name="priority" class="form-select">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <% if (userRoles.includes('Administrator') || userRoles.includes('Sales Manager')) { %>
+          <div class="form-group">
+            <label for="assigned_to" class="form-label">Assign To</label>
+            <select id="assigned_to" name="assigned_to" class="form-select">
+              <% users.forEach(u => { %>
+                <option value="<%= u.id %>"><%= u.first_name %> <%= u.last_name %></option>
+              <% }) %>
+            </select>
+          </div>
+        <% } %>
+
+        <div class="form-group">
+          <label for="due_date" class="form-label">Due Date</label>
+          <input 
+            type="date" 
+            id="due_date" 
+            name="due_date" 
+            class="form-input"
+          >
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary">Create Task</button>
+          <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Saviynt Demo App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+  
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Admin Dashboard</h1>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value"><%= stats.totalUsers %></div>
+      </div>
+      <div class="stat-card" style="border-left-color: var(--success);">
+        <div class="stat-label">Active Users</div>
+        <div class="stat-value"><%= stats.activeUsers %></div>
+      </div>
+      <div class="stat-card" style="border-left-color: var(--secondary);">
+        <div class="stat-label">Total Roles</div>
+        <div class="stat-value"><%= stats.totalRoles %></div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+      <div class="card">
+        <h2 class="card-header">User Management</h2>
+        <p style="margin-bottom: 1.5rem; color: var(--gray-600);">
+          Manage user accounts, roles, and permissions
+        </p>
+        <a href="/admin/users" class="btn btn-primary">Manage Users</a>
+      </div>
+
+      <div class="card">
+        <h2 class="card-header">Role Management</h2>
+        <p style="margin-bottom: 1.5rem; color: var(--gray-600);">
+          View and manage system roles and permissions
+        </p>
+        <a href="/admin/roles" class="btn btn-primary">Manage Roles</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

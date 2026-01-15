@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Saviynt Demo App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+  
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Edit Task</h1>
+      <a href="/tasks/<%= task.id %>" class="btn btn-secondary">Cancel</a>
+    </div>
+
+    <div class="card">
+      <form method="POST" action="/tasks/<%= task.id %>/edit">
+        <div class="form-group">
+          <label for="title" class="form-label">Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            class="form-input" 
+            value="<%= task.title %>"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="description" class="form-label">Description</label>
+          <textarea 
+            id="description" 
+            name="description" 
+            class="form-textarea"
+          ><%= task.description || '' %></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="type" class="form-label">Type *</label>
+          <select id="type" name="type" class="form-select" required>
+            <option value="Follow-up" <%= task.type === 'Follow-up' ? 'selected' : '' %>>Follow-up</option>
+            <option value="Prospecting" <%= task.type === 'Prospecting' ? 'selected' : '' %>>Prospecting</option>
+            <option value="Demo" <%= task.type === 'Demo' ? 'selected' : '' %>>Demo</option>
+            <option value="Negotiation" <%= task.type === 'Negotiation' ? 'selected' : '' %>>Negotiation</option>
+            <option value="Renewal" <%= task.type === 'Renewal' ? 'selected' : '' %>>Renewal</option>
+            <option value="Meeting Prep" <%= task.type === 'Meeting Prep' ? 'selected' : '' %>>Meeting Prep</option>
+            <option value="Training" <%= task.type === 'Training' ? 'selected' : '' %>>Training</option>
+            <option value="Administrative" <%= task.type === 'Administrative' ? 'selected' : '' %>>Administrative</option>
+            <option value="Reporting" <%= task.type === 'Reporting' ? 'selected' : '' %>>Reporting</option>
+            <option value="Analysis" <%= task.type === 'Analysis' ? 'selected' : '' %>>Analysis</option>
+            <option value="Research" <%= task.type === 'Research' ? 'selected' : '' %>>Research</option>
+            <option value="Review" <%= task.type === 'Review' ? 'selected' : '' %>>Review</option>
+            <option value="Content Creation" <%= task.type === 'Content Creation' ? 'selected' : '' %>>Content Creation</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status" class="form-label">Status *</label>
+          <select id="status" name="status" class="form-select" required>
+            <option value="open" <%= task.status === 'open' ? 'selected' : '' %>>Open</option>
+            <option value="in_progress" <%= task.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+            <option value="completed" <%= task.status === 'completed' ? 'selected' : '' %>>Completed</option>
+            <option value="cancelled" <%= task.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="priority" class="form-label">Priority</label>
+          <select id="priority" name="priority" class="form-select">
+            <option value="low" <%= task.priority === 'low' ? 'selected' : '' %>>Low</option>
+            <option value="medium" <%= task.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+            <option value="high" <%= task.priority === 'high' ? 'selected' : '' %>>High</option>
+          </select>
+        </div>
+
+        <% if (userRoles.includes('Administrator') || userRoles.includes('Sales Manager')) { %>
+          <div class="form-group">
+            <label for="assigned_to" class="form-label">Assign To</label>
+            <select id="assigned_to" name="assigned_to" class="form-select">
+              <% users.forEach(u => { %>
+                <option value="<%= u.id %>" <%= task.assigned_to === u.id ? 'selected' : '' %>>
+                  <%= u.first_name %> <%= u.last_name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+        <% } %>
+
+        <div class="form-group">
+          <label for="due_date" class="form-label">Due Date</label>
+          <input 
+            type="date" 
+            id="due_date" 
+            name="due_date" 
+            class="form-input"
+            value="<%= task.due_date || '' %>"
+          >
+        </div>
+
+        <div class="flex gap-2" style="justify-content: space-between;">
+          <div class="flex gap-2">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="/tasks/<%= task.id %>" class="btn btn-secondary">Cancel</a>
+          </div>
+          
+          <% if (userRoles.includes('Administrator') || userRoles.includes('Sales Manager')) { %>
+            <form method="POST" action="/tasks/<%= task.id %>/delete" style="display: inline;">
+              <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this task?')">
+                Delete Task
+              </button>
+            </form>
+          <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

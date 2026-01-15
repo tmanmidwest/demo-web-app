@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Saviynt Demo App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+  
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Task Details</h1>
+      <div class="flex gap-2">
+        <a href="/tasks/<%= task.id %>/edit" class="btn btn-primary">Edit</a>
+        <a href="/dashboard" class="btn btn-secondary">Back</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;"><%= task.title %></h2>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div>
+          <div class="text-sm text-gray-600">Status</div>
+          <div style="margin-top: 0.5rem;">
+            <% if (task.status === 'open') { %>
+              <span class="badge badge-warning">Open</span>
+            <% } else if (task.status === 'in_progress') { %>
+              <span class="badge badge-primary">In Progress</span>
+            <% } else if (task.status === 'completed') { %>
+              <span class="badge badge-success">Completed</span>
+            <% } else { %>
+              <span class="badge badge-gray"><%= task.status %></span>
+            <% } %>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm text-gray-600">Priority</div>
+          <div style="margin-top: 0.5rem;">
+            <% if (task.priority === 'high') { %>
+              <span class="badge badge-danger">High</span>
+            <% } else if (task.priority === 'medium') { %>
+              <span class="badge badge-warning">Medium</span>
+            <% } else { %>
+              <span class="badge badge-gray">Low</span>
+            <% } %>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm text-gray-600">Type</div>
+          <div style="margin-top: 0.5rem;">
+            <span class="badge badge-gray"><%= task.type %></span>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm text-gray-600">Due Date</div>
+          <div style="margin-top: 0.5rem; font-weight: 600;">
+            <%= task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not set' %>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <div class="text-sm text-gray-600">Description</div>
+        <div style="margin-top: 0.5rem;">
+          <%= task.description || 'No description provided' %>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+        <div>
+          <div class="text-sm text-gray-600">Assigned To</div>
+          <div style="margin-top: 0.5rem; font-weight: 600;">
+            <%= task.assigned_to_name %>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm text-gray-600">Created By</div>
+          <div style="margin-top: 0.5rem; font-weight: 600;">
+            <%= task.created_by_name %>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm text-gray-600">Created At</div>
+          <div style="margin-top: 0.5rem;">
+            <%= new Date(task.created_at).toLocaleString() %>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm text-gray-600">Updated At</div>
+          <div style="margin-top: 0.5rem;">
+            <%= new Date(task.updated_at).toLocaleString() %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
