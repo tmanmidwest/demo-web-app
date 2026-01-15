@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "init": "node scripts/init-db.js",
     "seed": "node scripts/seed-data.js",
-    "reset": "node scripts/reset-demo.js"
+    "reset": "node scripts/reset-demo.js",
+    "startup": "node scripts/startup.js"
   },
   "keywords": ["saviynt", "demo", "iga", "task-management"],
   "author": "",
