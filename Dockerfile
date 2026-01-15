@@ -11,9 +11,14 @@ RUN mkdir -p data
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Health check - start checking after 2 minutes
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
-# Install dependencies and run startup script
-CMD sh -c "npm install --omit=dev && node scripts/startup.js"
+# Install dependencies and run startup script with explicit output
+CMD echo "=== Starting container ===" && \
+    echo "=== Installing dependencies ===" && \
+    npm install --omit=dev 2>&1 && \
+    echo "=== Dependencies installed ===" && \
+    echo "=== Running startup script ===" && \
+    node scripts/startup.js
