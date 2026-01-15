@@ -69,6 +69,6 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Saviynt Demo App running on http://localhost:${PORT}`);
+  console.log(`✅ Task Demo Web App running on http://localhost:${PORT}`);
   console.log(`📚 Default login: admin / admin123`);
 });

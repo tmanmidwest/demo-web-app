@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Startup script for Saviynt Demo App
+ * Startup script for Task Demo Web App
  * This script handles database initialization, seeding, and starting the server
  */
 
@@ -11,7 +11,7 @@ const DATA_DIR = path.join(__dirname, '../data');
 const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
 
 async function startup() {
-  console.log('🚀 Starting Saviynt Demo App...');
+  console.log('🚀 Starting Task Demo Web App...');
   console.log(`📁 Database path: ${DB_PATH}`);
   
   // Ensure data directory exists
