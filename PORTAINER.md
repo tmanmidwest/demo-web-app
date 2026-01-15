@@ -67,20 +67,34 @@ services:
       - PORT=3000
       - SESSION_SECRET=change-this-secret-in-production
     volumes:
-      - app-data:/app/data
       - ./:/app
-    command: sh -c "npm install && npm run init && npm run seed && npm start"
+      - app-data:/app/data
+      - node-modules:/app/node_modules
+    command: >
+      sh -c "npm install --production &&
+             node scripts/init-db.js &&
+             node scripts/seed-data.js &&
+             npm start"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
-      timeout: 10s
+      timeout: 3s
       retries: 3
+      start_period: 40s
 
 volumes:
   app-data:
     driver: local
+  node-modules:
+    driver: local
 ```
+
+**Note**: This configuration:
+- Uses the official Node.js image (no build required)
+- Installs dependencies at startup
+- Initializes database automatically
+- Persists data in Docker volumes
 
 ### Step 4: Environment Variables (Optional)
 Under **Environment variables** section, add:
@@ -254,6 +268,26 @@ npm run reset
 ---
 
 ## Troubleshooting in Portainer
+
+### "compose build operation failed" Error
+This error occurs when using a docker-compose.yml that tries to build an image. 
+
+**Solution**: Use the updated docker-compose.yml provided above which uses the pre-built `node:18-alpine` image instead of building. This configuration:
+- Doesn't require a Dockerfile
+- Installs dependencies at container startup
+- Works with Git repository deployment
+- Avoids build-time network issues
+
+If you see this error:
+```
+Failed to deploy a stack: compose build operation failed
+exit code: 1
+```
+
+**Fix it**:
+1. Delete the failed stack in Portainer
+2. Use the docker-compose.yml configuration shown in "Option B: Web Editor" above
+3. Redeploy
 
 ### Container Won't Start
 1. Check logs: **Containers** → `saviynt-demo-app` → **Logs**

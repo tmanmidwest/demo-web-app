@@ -5,17 +5,14 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (use npm install instead of npm ci for flexibility)
+RUN npm install --production
 
 # Copy application files
 COPY . .
 
 # Create data directory
 RUN mkdir -p data
-
-# Initialize database on first run
-RUN node scripts/init-db.js && node scripts/seed-data.js
 
 # Expose port
 EXPOSE 3000
@@ -24,5 +21,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start application
-CMD ["npm", "start"]
+# Initialize database and start application
+CMD sh -c "node scripts/init-db.js && node scripts/seed-data.js && npm start"
