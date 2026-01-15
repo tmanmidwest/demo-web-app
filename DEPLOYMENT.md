@@ -60,7 +60,7 @@ DATABASE_PATH=./data/database.sqlite
 # Build and start
 docker-compose up -d
 
-# View logs
+# View logs (watch startup progress)
 docker-compose logs -f
 
 # Stop
@@ -71,6 +71,8 @@ docker-compose up -d --build
 ```
 
 **Access**: `http://localhost:3000`
+
+> **Note**: First startup takes 2-3 minutes as it installs dependencies and initializes the database. Watch logs to see progress.
 
 ### Using Docker Only
 

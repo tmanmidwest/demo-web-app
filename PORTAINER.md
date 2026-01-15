@@ -6,57 +6,101 @@ Complete guide for deploying Saviynt Demo App using Portainer.
 
 - Portainer installed and running
 - Access to Portainer web interface
-- This repository files available
-
-## Deployment Methods
-
-You have two options for deploying with Portainer:
-
-### Method 1: Using Stacks (Recommended)
-- Best for: Quick deployment from Git repository
-- Time: 5 minutes
-- Difficulty: Easy
-
-### Method 2: Manual Container Creation
-- Best for: Custom configuration
-- Time: 10 minutes
-- Difficulty: Moderate
+- Git repository URL (GitHub, GitLab, etc.) OR the source files
 
 ---
 
-## Method 1: Deploy Using Stacks
+## Deployment Method 1: From Git Repository (Recommended)
 
-### Step 1: Access Portainer
-1. Open Portainer in your browser (usually `http://your-server:9000`)
-2. Log in with your credentials
-3. Select your Docker environment
+This is the easiest method - Portainer clones your repo and builds the container automatically.
 
-### Step 2: Create New Stack
-1. Click **Stacks** in the left sidebar
-2. Click **+ Add stack** button
-3. Enter stack name: `saviynt-demo-app`
+### Step 1: Push Code to Git Repository
 
-### Step 3: Configure Stack
+First, ensure your code is in a Git repository (GitHub, GitLab, Bitbucket, etc.):
 
-Choose one of these options:
+```bash
+# If not already a git repo
+cd saviynt-demo-app
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR-USERNAME/saviynt-demo-app.git
+git push -u origin main
+```
 
-#### Option A: From Git Repository (Easiest)
-1. Select **Repository** tab
-2. Fill in:
-   - **Repository URL**: `https://github.com/your-username/saviynt-demo-app`
-   - **Repository reference**: `refs/heads/main`
-   - **Compose path**: `docker-compose.yml`
-3. Skip to Step 4
+### Step 2: Create Stack in Portainer
 
-#### Option B: Web Editor (No Git Required)
-1. Select **Web editor** tab
-2. Paste this configuration:
+1. **Login to Portainer** (usually `http://your-server:9000`)
+2. **Select your environment** (local Docker or remote)
+3. **Click "Stacks"** in the left sidebar
+4. **Click "+ Add stack"**
+
+### Step 3: Configure Repository Deployment
+
+1. **Name**: `saviynt-demo-app`
+2. **Build method**: Select **"Repository"**
+3. **Repository URL**: `https://github.com/YOUR-USERNAME/saviynt-demo-app`
+4. **Repository reference**: `refs/heads/main` (or your branch name)
+5. **Compose path**: `docker-compose.yml`
+
+### Step 4: Authentication (If Private Repo)
+
+If your repository is private:
+1. Toggle **"Authentication"** on
+2. Enter your Git **username**
+3. Enter your **personal access token** (not password)
+
+### Step 5: Deploy
+
+1. Click **"Deploy the stack"**
+2. Wait for deployment (2-3 minutes on first run)
+3. Check the container status shows "running"
+
+### Step 6: Access Application
+
+- **URL**: `http://YOUR-PORTAINER-HOST-IP:3000`
+- **Login**: `admin` / `admin123`
+
+---
+
+## Deployment Method 2: Web Editor (No Git Required)
+
+Use this if you don't want to use a Git repository.
+
+### Step 1: Upload Files to Portainer Host
+
+First, get the files onto your Portainer server:
+
+```bash
+# SSH into your Portainer host
+ssh user@your-portainer-server
+
+# Create directory
+sudo mkdir -p /opt/saviynt-demo-app
+
+# Option A: Clone from Git
+cd /opt
+sudo git clone https://github.com/YOUR-USERNAME/saviynt-demo-app.git
+
+# Option B: Upload ZIP and extract
+cd /opt/saviynt-demo-app
+# Upload saviynt-demo-app.zip here
+sudo unzip saviynt-demo-app.zip
+sudo mv saviynt-demo-app/* .
+```
+
+### Step 2: Create Stack with Web Editor
+
+1. In Portainer, go to **Stacks** → **+ Add stack**
+2. **Name**: `saviynt-demo-app`
+3. **Build method**: Select **"Web editor"**
+4. **Paste this configuration**:
 
 ```yaml
 version: '3.8'
 
 services:
-  saviynt-demo:
+  app:
     image: node:18-alpine
     container_name: saviynt-demo-app
     working_dir: /app
@@ -65,383 +109,209 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - SESSION_SECRET=change-this-secret-in-production
+      - SESSION_SECRET=change-this-to-a-random-string
     volumes:
-      - ./:/app
+      - /opt/saviynt-demo-app:/app:ro
       - app-data:/app/data
       - node-modules:/app/node_modules
     command: >
-      sh -c "npm install --production &&
+      sh -c "cp -r /app/* /tmp/app 2>/dev/null || true &&
+             cd /tmp/app &&
+             npm install --production &&
              node scripts/init-db.js &&
              node scripts/seed-data.js &&
-             npm start"
+             node server.js"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
 
 volumes:
   app-data:
-    driver: local
   node-modules:
-    driver: local
 ```
 
-**Note**: This configuration:
-- Uses the official Node.js image (no build required)
-- Installs dependencies at startup
-- Initializes database automatically
-- Persists data in Docker volumes
+> **Important**: Change `/opt/saviynt-demo-app` to the actual path where you uploaded the files.
 
-### Step 4: Environment Variables (Optional)
-Under **Environment variables** section, add:
+### Step 3: Deploy
 
-| Name | Value |
-|------|-------|
-| `SESSION_SECRET` | Your custom secret key |
-| `NODE_ENV` | `production` |
-
-### Step 5: Deploy
-1. Click **Deploy the stack**
+1. Click **"Deploy the stack"**
 2. Wait for deployment (2-3 minutes)
-3. Check status in Stacks list
-
-### Step 6: Verify Deployment
-1. In Stacks, click on `saviynt-demo-app`
-2. Check container status (should be "running")
-3. Click **Logs** to see application output
-4. Look for: `✅ Saviynt Demo App running on http://localhost:3000`
-
-### Step 7: Access Application
-- Find your Portainer host IP address
-- Open browser to: `http://<portainer-host-ip>:3000`
-- Login with: `admin` / `admin123`
+3. Verify container is running
 
 ---
 
-## Method 2: Manual Container Creation
+## Verifying Deployment
 
-### Step 1: Prepare Application Files
-1. Upload files to Portainer host
-2. SSH into host:
-```bash
-ssh user@portainer-host
-```
+### Check Container Status
 
-3. Create directory:
-```bash
-mkdir -p /opt/saviynt-demo-app
-cd /opt/saviynt-demo-app
-```
-
-4. Upload or clone files here
-
-### Step 2: Create Container in Portainer
 1. Go to **Containers** in Portainer
-2. Click **+ Add container**
-3. Configure:
+2. Find `saviynt-demo-app`
+3. Status should show **"running"** (green)
 
-**Basic settings:**
-- **Name**: `saviynt-demo-app`
-- **Image**: `node:18-alpine`
+### View Logs
 
-**Network:**
-- **Port mapping**: 
-  - Host: `3000`
-  - Container: `3000`
+1. Click on the container name
+2. Click **"Logs"** tab
+3. You should see:
+   ```
+   ✅ Database schema initialized
+   ✅ Demo data seeded successfully
+   ✅ Saviynt Demo App running on http://localhost:3000
+   ```
 
-**Advanced:**
-- **Command**: 
-  ```
-  sh -c "cd /app && npm install && npm run init && npm run seed && npm start"
-  ```
+### Test Application
 
-**Volumes:**
-- Click **+ map additional volume**
-  - Container: `/app`
-  - Host: `/opt/saviynt-demo-app`
+Open browser to: `http://YOUR-SERVER-IP:3000`
 
-**Environment variables:**
-- `NODE_ENV`: `production`
-- `SESSION_SECRET`: `your-secret-here`
-
-**Restart policy:**
-- Select: `Unless stopped`
-
-4. Click **Deploy the container**
+You should see the login page.
 
 ---
 
-## Accessing the Application
+## Troubleshooting
 
-### From Same Network
-```
-http://<portainer-host-ip>:3000
-```
+### Error: "compose build operation failed"
 
-### From Internet (with Port Forwarding)
-1. Configure router port forwarding:
-   - External: 3000 → Internal: <portainer-host-ip>:3000
-2. Access via: `http://<public-ip>:3000`
+**Cause**: Docker can't download Node.js packages during build.
 
-### Using Reverse Proxy (Recommended for Production)
-See [Reverse Proxy Setup](#reverse-proxy-setup) below
+**Solution**: The updated Dockerfile installs packages at runtime. Make sure you're using the latest version of the files.
+
+### Error: Container exits immediately
+
+**Check logs**:
+1. **Containers** → `saviynt-demo-app` → **Logs**
+2. Look for error messages
+
+**Common fixes**:
+- Port 3000 in use: Change port mapping to `"3001:3000"`
+- Permission issues: Check volume mount paths exist
+
+### Error: "Cannot find module"
+
+**Cause**: Dependencies not installed properly.
+
+**Solution**: 
+1. Stop and remove the container
+2. Remove the `node-modules` volume:
+   - **Volumes** → find `saviynt-demo-app_node-modules` → **Remove**
+3. Redeploy the stack
+
+### Error: Database errors
+
+**Solution**: Reset the database:
+1. Stop the stack
+2. Remove the `app-data` volume
+3. Redeploy (will recreate database)
+
+### Application very slow to start
+
+**This is normal on first run.** The container needs to:
+1. Download npm packages (~60 seconds)
+2. Initialize database (~5 seconds)
+3. Seed demo data (~10 seconds)
+
+Subsequent restarts are faster because packages are cached.
 
 ---
 
 ## Managing the Application
 
-### View Logs
-1. Go to **Stacks** → `saviynt-demo-app`
-2. Click **Logs** tab
-3. Or for container: **Containers** → `saviynt-demo-app` → **Logs**
-
-### Restart Application
-**From Stack:**
-1. **Stacks** → `saviynt-demo-app`
-2. Click **Stop** then **Start**
-
-**From Container:**
-1. **Containers** → `saviynt-demo-app`
-2. Click **Restart**
-
-### Update Application
-**If using Git repository:**
-1. **Stacks** → `saviynt-demo-app`
-2. Click **Update the stack**
-3. Enable **Pull latest image**
-4. Click **Update**
-
-**If using manual deployment:**
-1. Update files on host
-2. Restart container
-
 ### Stop Application
 1. **Stacks** → `saviynt-demo-app`
-2. Click **Stop**
+2. Click **"Stop"**
 
-### Remove Application
+### Restart Application
 1. **Stacks** → `saviynt-demo-app`
-2. Click **Delete** (data will be preserved in volume)
+2. Click **"Stop"** then **"Start"**
 
----
+### Update Application (Git Repository Method)
 
-## Data Management
-
-### Backup Data
-1. Go to **Volumes**
-2. Find `saviynt-demo-app_app-data`
-3. Use Portainer's backup feature or:
-
-```bash
-# Via SSH to host
-docker run --rm -v saviynt-demo-app_app-data:/data \
-  -v $(pwd):/backup alpine \
-  tar czf /backup/saviynt-backup-$(date +%Y%m%d).tar.gz -C /data .
-```
-
-### Restore Data
-```bash
-docker run --rm -v saviynt-demo-app_app-data:/data \
-  -v $(pwd):/backup alpine \
-  tar xzf /backup/saviynt-backup-YYYYMMDD.tar.gz -C /data
-```
+1. Push changes to your Git repository
+2. In Portainer: **Stacks** → `saviynt-demo-app`
+3. Click **"Pull and redeploy"**
 
 ### Reset Demo Data
-1. **Containers** → `saviynt-demo-app`
-2. Click **Console** → **Connect**
-3. Select: `/bin/sh`
-4. Run:
+
 ```bash
-npm run reset
+# Via Portainer Console
+# Containers → saviynt-demo-app → Console → Connect
+
+# In the container shell:
+node scripts/reset-demo.js
 ```
 
-### Clear All Data
+Or simply:
 1. Stop the stack
-2. **Volumes** → `saviynt-demo-app_app-data`
-3. Click **Remove**
-4. Restart stack (will recreate with fresh data)
+2. Delete the `app-data` volume
+3. Start the stack (will reinitialize)
+
+### View Container Shell
+
+1. **Containers** → `saviynt-demo-app`
+2. Click **"Console"**
+3. Select **"/bin/sh"**
+4. Click **"Connect"**
 
 ---
 
-## Troubleshooting in Portainer
-
-### "compose build operation failed" Error
-This error occurs when using a docker-compose.yml that tries to build an image. 
-
-**Solution**: Use the updated docker-compose.yml provided above which uses the pre-built `node:18-alpine` image instead of building. This configuration:
-- Doesn't require a Dockerfile
-- Installs dependencies at container startup
-- Works with Git repository deployment
-- Avoids build-time network issues
-
-If you see this error:
-```
-Failed to deploy a stack: compose build operation failed
-exit code: 1
-```
-
-**Fix it**:
-1. Delete the failed stack in Portainer
-2. Use the docker-compose.yml configuration shown in "Option B: Web Editor" above
-3. Redeploy
-
-### Container Won't Start
-1. Check logs: **Containers** → `saviynt-demo-app` → **Logs**
-2. Common issues:
-   - Port 3000 already in use
-   - Insufficient permissions
-   - Missing volume mount
-
-### Can't Access Application
-1. Verify container is running (green status)
-2. Check port mapping: **Containers** → `saviynt-demo-app` → **Published ports**
-3. Test from Portainer host:
-```bash
-curl http://localhost:3000
-```
-
-### Performance Issues
-1. Check resource usage: **Containers** → `saviynt-demo-app` → **Stats**
-2. Increase container resources if needed
-
-### Database Errors
-1. Stop container
-2. Remove volume: **Volumes** → Delete `app-data`
-3. Restart container (will reinitialize)
-
----
-
-## Reverse Proxy Setup
-
-### Using Nginx Proxy Manager (in Portainer)
-
-1. **Deploy Nginx Proxy Manager** (if not installed):
-```yaml
-version: '3.8'
-services:
-  nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:latest'
-    ports:
-      - '80:80'
-      - '443:443'
-      - '81:81'
-    volumes:
-      - npm-data:/data
-      - npm-letsencrypt:/etc/letsencrypt
-    restart: unless-stopped
-
-volumes:
-  npm-data:
-  npm-letsencrypt:
-```
-
-2. **Configure Proxy Host**:
-   - Access NPM: `http://<host-ip>:81`
-   - Add Proxy Host:
-     - Domain: `demo.yourdomain.com`
-     - Forward to: `saviynt-demo-app:3000`
-     - Enable SSL (optional)
-
-3. **Access via domain**: `https://demo.yourdomain.com`
-
----
-
-## Production Checklist
-
-Before using in production:
-
-- [ ] Change SESSION_SECRET environment variable
-- [ ] Update all default passwords
-- [ ] Enable SSL/HTTPS
-- [ ] Configure firewall rules
-- [ ] Set up regular backups
-- [ ] Configure restart policies
-- [ ] Enable container health checks
-- [ ] Set resource limits
-- [ ] Configure logging
-- [ ] Test disaster recovery
-
----
-
-## Best Practices
-
-### Security
-- Use secrets for sensitive data
-- Don't expose port 3000 directly to internet
-- Use reverse proxy with SSL
-- Regular security updates
-
-### Monitoring
-- Enable container health checks
-- Set up alerts for container failures
-- Monitor resource usage
-- Regular log reviews
-
-### Maintenance
-- Regular backups (daily recommended)
-- Test restores periodically
-- Keep Docker images updated
-- Document any customizations
-
----
-
-## Quick Reference Commands
-
-### View Application Status
-```bash
-docker ps | grep saviynt
-```
-
-### View Live Logs
-```bash
-docker logs -f saviynt-demo-app
-```
-
-### Execute Commands in Container
-```bash
-docker exec -it saviynt-demo-app sh
-npm run reset
-```
+## Data Backup
 
 ### Backup Database
+
 ```bash
-docker exec saviynt-demo-app \
-  tar czf /tmp/backup.tar.gz /app/data
-docker cp saviynt-demo-app:/tmp/backup.tar.gz ./
+# On Portainer host
+docker cp saviynt-demo-app:/app/data/database.sqlite ./backup-$(date +%Y%m%d).sqlite
+```
+
+### Restore Database
+
+```bash
+docker cp ./backup-YYYYMMDD.sqlite saviynt-demo-app:/app/data/database.sqlite
+docker restart saviynt-demo-app
 ```
 
 ---
 
-## Support
+## Security Recommendations
 
-### Common Issues
-1. **Port conflict**: Change port mapping in stack
-2. **Permission denied**: Check volume permissions
-3. **Database locked**: Restart container
+Before using in any shared environment:
 
-### Getting Help
-- Check Portainer logs
-- Review container logs
-- Consult main [README.md](README.md)
-- Check [DEPLOYMENT.md](DEPLOYMENT.md)
+- [ ] Change `SESSION_SECRET` to a random string
+- [ ] Change default passwords after first login
+- [ ] Consider adding a reverse proxy with HTTPS
+- [ ] Restrict network access to port 3000
+
+---
+
+## Quick Reference
+
+| Action | Location |
+|--------|----------|
+| View logs | Containers → saviynt-demo-app → Logs |
+| Restart | Stacks → saviynt-demo-app → Stop/Start |
+| Update from Git | Stacks → saviynt-demo-app → Pull and redeploy |
+| Access shell | Containers → saviynt-demo-app → Console |
+| Check health | Containers → saviynt-demo-app → Status |
+
+---
+
+## Default Credentials
+
+| Role | Username | Password |
+|------|----------|----------|
+| Administrator | `admin` | `admin123` |
+| Sales Manager | `jsmith` | `admin123` |
+| Sales User | `mwilliams` | `admin123` |
+| Reporting User | `rmartinez` | `admin123` |
 
 ---
 
 ## Next Steps
 
-After deployment:
-1. Access application at `http://<host-ip>:3000`
-2. Login as administrator
-3. Explore features
-4. Configure for your use case
-5. Set up regular backups
+After successful deployment:
+1. Access the app at `http://YOUR-SERVER:3000`
+2. Login as admin
+3. Explore the user management features
+4. Test with Saviynt's agentic onboarding
 
-**Default Login**: `admin` / `admin123`
-
----
-
-**Pro Tip**: Use Portainer's template feature to save this configuration for quick redeployment!
+For more help, see:
+- [README.md](README.md) - Full documentation
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues
+- [QUICKSTART.md](QUICKSTART.md) - Local development
