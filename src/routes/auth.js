@@ -19,11 +19,16 @@ router.get('/login', redirectIfAuth, (req, res) => {
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
+  console.log(`🔐 Login attempt for user: ${username}`);
+
   try {
     // Find user by username
     const user = userQueries.findByUsername.get(username);
 
+    console.log(`🔐 User found: ${user ? 'yes' : 'no'}`);
+
     if (!user) {
+      console.log(`🔐 No user found with username: ${username}`);
       return res.render('login', {
         title: 'Login',
         error: 'Invalid username or password'
@@ -32,6 +37,7 @@ router.post('/login', async (req, res) => {
 
     // Check if user is active
     if (user.status !== 'active') {
+      console.log(`🔐 User ${username} is not active: ${user.status}`);
       return res.render('login', {
         title: 'Login',
         error: 'Your account has been deactivated. Please contact an administrator.'
@@ -39,7 +45,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Verify password
+    console.log(`🔐 Verifying password for user: ${username}`);
     const isValid = await verifyPassword(password, user.password);
+    console.log(`🔐 Password valid: ${isValid}`);
 
     if (!isValid) {
       return res.render('login', {
@@ -50,6 +58,7 @@ router.post('/login', async (req, res) => {
 
     // Get user roles
     const roles = getUserRoles(user.id);
+    console.log(`🔐 User ${username} roles: ${roles.join(', ')}`);
 
     // Store user in session (without password)
     req.session.user = {
@@ -63,6 +72,7 @@ router.post('/login', async (req, res) => {
       roles: roles
     };
 
+    console.log(`🔐 Login successful for user: ${username}`);
     // Redirect to dashboard
     res.redirect('/dashboard');
   } catch (error) {
