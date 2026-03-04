@@ -16,11 +16,11 @@ This application serves as a **test target** for Saviynt's agentic capabilities 
 ## Key Features
 
 ### 👥 User Management
-- **Create Users**: Add new users with profile information
+- **Create Users**: Add new users with profile information. A default password (`changeme123456789change`) is automatically assigned at creation — no password entry required during the create flow.
 - **Update Users**: Modify user details, status, and roles
 - **Delete Users**: Remove users from the system
 - **Activate/Deactivate**: Enable or disable user access
-- **Password Management**: Reset user passwords
+- **Password Management**: Reset user passwords manually after creation via the Reset Password action
 - **Organizational Hierarchy**: Assign managers to users
 
 ### 🔐 Role-Based Access Control
@@ -165,9 +165,10 @@ saviynt-demo-app/
 1. Saviynt receives onboarding request
 2. Logs into demo app as admin
 3. Navigates to "Create User"
-4. Fills in user details
+4. Fills in user details (no password required — default is auto-assigned)
 5. Assigns appropriate role
 6. Confirms user creation
+7. Optionally resets password via the Reset Password action
 
 ### Scenario 2: Role Change
 1. Access certification review triggers role change
