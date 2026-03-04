@@ -72,10 +72,10 @@ router.get('/users/create', requireRole('Administrator'), (req, res) => {
 // Create user POST
 router.post('/users/create', requireRole('Administrator'), async (req, res) => {
   try {
-    const { username, password, first_name, last_name, email, manager_id, department, location, roles } = req.body;
+    const { username, first_name, last_name, email, manager_id, department, location, roles } = req.body;
 
     // Validate required fields
-    if (!username || !password || !first_name || !last_name || !email) {
+    if (!username || !first_name || !last_name || !email) {
       const allRoles = roleQueries.getAll.all();
       const managers = userQueries.getAll.all().filter(u => u.status === 'active');
       
@@ -104,7 +104,8 @@ router.post('/users/create', requireRole('Administrator'), async (req, res) => {
     }
 
     // Hash password
-    const hashedPassword = await hashPassword(password);
+    const DEFAULT_PASSWORD = 'changeme123456789change';
+    const hashedPassword = await hashPassword(DEFAULT_PASSWORD);
 
     // Create user
     const result = userQueries.create.run(
