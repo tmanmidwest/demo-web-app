@@ -23,6 +23,7 @@ This demo application showcases how Saviynt's agentic onboarding can:
 - Manager assignment and organizational hierarchy
 - User status management (active/inactive)
 - Password reset functionality
+- **New user creation does not require a password** — a default password (`changeme123456789change`) is automatically assigned. Admins can reset it afterward via the Reset Password action.
 
 ### Role-Based Access Control
 - **Administrator**: Full system access, user and role management
@@ -89,6 +90,8 @@ Open your browser to: `http://localhost:3000`
 | Sales Manager | `jsmith` | `admin123` | Team management |
 | Sales User | `mwilliams` | `admin123` | Basic user |
 | Reporting User | `rmartinez` | `admin123` | Read-only access |
+
+> **Note**: New users created through the admin UI are automatically assigned the default password `changeme123456789change`. Use the Reset Password action to set a real password after creation.
 
 ## 🐳 Docker Deployment
 
@@ -265,6 +268,11 @@ For issues or questions:
 - Docker support
 - Demo data seeding
 - Comprehensive documentation
+
+### Version 1.1.0
+- Removed password field from user creation form
+- New users are automatically assigned a default password (`changeme123456789change`)
+- Admins reset passwords post-creation via the Reset Password action
 
 ---
 
