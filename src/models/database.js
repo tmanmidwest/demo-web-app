@@ -221,6 +221,8 @@ const taskQueries = {
   
   delete: db.prepare('DELETE FROM tasks WHERE id = ?'),
 
+  deleteByUser: db.prepare('DELETE FROM tasks WHERE assigned_to = ? OR created_by = ?'),
+
   // Delete all tasks associated with a user (assigned to or created by)
   deleteByUser: db.prepare('DELETE FROM tasks WHERE assigned_to = ? OR created_by = ?'),
   
@@ -252,5 +254,5 @@ module.exports = {
   taskQueries,
   hashPassword,
   verifyPassword
-  
+
 };

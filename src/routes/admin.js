@@ -308,13 +308,10 @@ router.post('/users/:id/delete', requireRole('Administrator'), (req, res) => {
       return res.redirect('/admin/users?error=User not found');
     }
 
-    // Delete all tasks assigned to or created by this user first,
-    // to satisfy the foreign key constraint on the tasks table.
+    // Delete tasks first to satisfy foreign key constraint
     taskQueries.deleteByUser.run(userId, userId);
 
-    // Now safe to delete the user (user_roles cascade automatically)
     userQueries.delete.run(userId);
-
     res.redirect('/admin/users?success=User deleted successfully');
   } catch (error) {
     console.error('Delete user error:', error);
