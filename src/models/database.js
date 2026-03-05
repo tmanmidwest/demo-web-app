@@ -252,4 +252,5 @@ module.exports = {
   taskQueries,
   hashPassword,
   verifyPassword
+  
 };
