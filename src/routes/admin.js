@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireRole } = require('../middleware/auth');
-const { userQueries, roleQueries, userRoleQueries, hashPassword } = require('../models/database');
+const { userQueries, roleQueries, userRoleQueries, taskQueries, hashPassword } = require('../models/database');
 
 // Admin dashboard
 router.get('/', requireRole('Administrator'), (req, res) => {
@@ -32,7 +32,7 @@ router.get('/', requireRole('Administrator'), (req, res) => {
 router.get('/users', requireRole('Administrator'), (req, res) => {
   try {
     const users = userQueries.getAll.all();
-    
+
     res.render('admin/users', {
       title: 'User Management',
       users: users,
@@ -78,7 +78,7 @@ router.post('/users/create', requireRole('Administrator'), async (req, res) => {
     if (!username || !first_name || !last_name || !email) {
       const allRoles = roleQueries.getAll.all();
       const managers = userQueries.getAll.all().filter(u => u.status === 'active');
-      
+
       return res.render('admin/user-create', {
         title: 'Create User',
         roles: allRoles,
@@ -94,7 +94,7 @@ router.post('/users/create', requireRole('Administrator'), async (req, res) => {
     if (existingUser || existingEmail) {
       const allRoles = roleQueries.getAll.all();
       const managers = userQueries.getAll.all().filter(u => u.status === 'active');
-      
+
       return res.render('admin/user-create', {
         title: 'Create User',
         roles: allRoles,
@@ -103,7 +103,7 @@ router.post('/users/create', requireRole('Administrator'), async (req, res) => {
       });
     }
 
-    // Hash password
+    // Hash default password
     const DEFAULT_PASSWORD = 'changeme123456789change';
     const hashedPassword = await hashPassword(DEFAULT_PASSWORD);
 
@@ -135,7 +135,7 @@ router.post('/users/create', requireRole('Administrator'), async (req, res) => {
     console.error('Create user error:', error);
     const allRoles = roleQueries.getAll.all();
     const managers = userQueries.getAll.all().filter(u => u.status === 'active');
-    
+
     res.render('admin/user-create', {
       title: 'Create User',
       roles: allRoles,
@@ -157,7 +157,7 @@ router.get('/users/:id/edit', requireRole('Administrator'), (req, res) => {
 
     const allRoles = roleQueries.getAll.all();
     const managers = userQueries.getAll.all().filter(u => u.status === 'active' && u.id !== userId);
-    
+
     // Parse user role IDs
     const userRoleIds = user.role_ids ? user.role_ids.split(',').map(id => parseInt(id)) : [];
 
@@ -303,7 +303,18 @@ router.post('/users/:id/delete', requireRole('Administrator'), (req, res) => {
       return res.redirect('/admin/users?error=Cannot delete your own account');
     }
 
+    const user = userQueries.findById.get(userId);
+    if (!user) {
+      return res.redirect('/admin/users?error=User not found');
+    }
+
+    // Delete all tasks assigned to or created by this user first,
+    // to satisfy the foreign key constraint on the tasks table.
+    taskQueries.deleteByUser.run(userId, userId);
+
+    // Now safe to delete the user (user_roles cascade automatically)
     userQueries.delete.run(userId);
+
     res.redirect('/admin/users?success=User deleted successfully');
   } catch (error) {
     console.error('Delete user error:', error);
