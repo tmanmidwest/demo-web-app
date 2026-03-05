@@ -311,6 +311,9 @@ router.post('/users/:id/delete', requireRole('Administrator'), (req, res) => {
     // Delete tasks first to satisfy foreign key constraint
     taskQueries.deleteByUser.run(userId, userId);
 
+    // Null out manager references to this user
+    userQueries.clearManagerRef.run(userId);
+
     userQueries.delete.run(userId);
     res.redirect('/admin/users?success=User deleted successfully');
   } catch (error) {

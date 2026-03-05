@@ -124,6 +124,8 @@ const userQueries = {
   
   delete: db.prepare('DELETE FROM users WHERE id = ?'),
   
+  clearManagerRef: db.prepare('UPDATE users SET manager_id = NULL WHERE manager_id = ?'),
+
   getUserWithRoles: db.prepare(`
     SELECT u.*, GROUP_CONCAT(r.name) as roles, GROUP_CONCAT(r.id) as role_ids
     FROM users u
@@ -220,8 +222,6 @@ const taskQueries = {
   `),
   
   delete: db.prepare('DELETE FROM tasks WHERE id = ?'),
-
-  deleteByUser: db.prepare('DELETE FROM tasks WHERE assigned_to = ? OR created_by = ?'),
 
   // Delete all tasks associated with a user (assigned to or created by)
   deleteByUser: db.prepare('DELETE FROM tasks WHERE assigned_to = ? OR created_by = ?'),
